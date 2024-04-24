@@ -1,0 +1,277 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "impersonation": {},
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedcommondataserviceforapps_ffb53"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "staticResults": {
+        "Add_a_new_row0": {
+          "status": "Succeeded"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_variable": {
+          "runAfter": {},
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "MovieIds",
+                "type": "array",
+                "value": [
+                  "tt0111161",
+                  "tt0068646",
+                  "tt0071562",
+                  "tt0468569",
+                  "tt0050083",
+                  "tt0108052",
+                  "tt0110912",
+                  "tt0167260",
+                  "tt0060196",
+                  "tt0137523",
+                  "tt0120737",
+                  "tt0080684",
+                  "tt0109830",
+                  "tt1375666",
+                  "tt0167261",
+                  "tt0073486",
+                  "tt0099685",
+                  "tt0133093",
+                  "tt0047478",
+                  "tt0317248"
+                ]
+              }
+            ]
+          }
+        },
+        "Initialize_variable_1": {
+          "runAfter": {
+            "Initialize_variable": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "MovieDetailsList",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "Apply_to_each": {
+          "foreach": "@variables('MovieIds')",
+          "actions": {
+            "HTTP": {
+              "type": "Http",
+              "inputs": {
+                "uri": "http://www.omdbapi.com/",
+                "method": "GET",
+                "queries": {
+                  "i": "@{items('Apply_to_each')}",
+                  "apikey": "72936f33"
+                }
+              },
+              "runtimeConfiguration": {
+                "contentTransfer": {
+                  "transferMode": "Chunked"
+                }
+              }
+            },
+            "Parse_JSON": {
+              "runAfter": {
+                "HTTP": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@body('HTTP')",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Title": {
+                      "type": "string"
+                    },
+                    "Year": {
+                      "type": "string"
+                    },
+                    "Rated": {
+                      "type": "string"
+                    },
+                    "Released": {
+                      "type": "string"
+                    },
+                    "Runtime": {
+                      "type": "string"
+                    },
+                    "Genre": {
+                      "type": "string"
+                    },
+                    "Director": {
+                      "type": "string"
+                    },
+                    "Writer": {
+                      "type": "string"
+                    },
+                    "Actors": {
+                      "type": "string"
+                    },
+                    "Plot": {
+                      "type": "string"
+                    },
+                    "Language": {
+                      "type": "string"
+                    },
+                    "Country": {
+                      "type": "string"
+                    },
+                    "Awards": {
+                      "type": "string"
+                    },
+                    "Poster": {
+                      "type": "string"
+                    },
+                    "Ratings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "Source": {
+                            "type": "string"
+                          },
+                          "Value": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "Source",
+                          "Value"
+                        ]
+                      }
+                    },
+                    "Metascore": {
+                      "type": "string"
+                    },
+                    "imdbRating": {
+                      "type": "string"
+                    },
+                    "imdbVotes": {
+                      "type": "string"
+                    },
+                    "imdbID": {
+                      "type": "string"
+                    },
+                    "Type": {
+                      "type": "string"
+                    },
+                    "DVD": {
+                      "type": "string"
+                    },
+                    "BoxOffice": {
+                      "type": "string"
+                    },
+                    "Production": {
+                      "type": "string"
+                    },
+                    "Website": {
+                      "type": "string"
+                    },
+                    "Response": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "Add_a_new_row": {
+              "runAfter": {
+                "Parse_JSON": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "crace_movies",
+                  "item/crace_title": "@body('Parse_JSON')?['Title']",
+                  "item/crace_actors": "@body('Parse_JSON')?['Actors']",
+                  "item/crace_awards": "@body('Parse_JSON')?['Awards']",
+                  "item/crace_country": "@body('Parse_JSON')?['Country']",
+                  "item/crace_director": "@body('Parse_JSON')?['Director']",
+                  "item/crace_genre": "@body('Parse_JSON')?['Genre']",
+                  "item/crace_imdbid": "@body('Parse_JSON')?['imdbID']",
+                  "item/crace_imdbvotes": "@body('Parse_JSON')?['imdbVotes']",
+                  "item/crace_language": "@body('Parse_JSON')?['Language']",
+                  "item/crace_plot": "@body('Parse_JSON')?['Plot']",
+                  "item/crace_poster": "@body('Parse_JSON')?['Poster']",
+                  "item/crace_rated": "@body('Parse_JSON')?['Rated']",
+                  "item/crace_released": "@body('Parse_JSON')?['Released']",
+                  "item/crace_runtime": "@body('Parse_JSON')?['Runtime']",
+                  "item/crace_writer": "@body('Parse_JSON')?['Writer']",
+                  "item/crace_year": "@body('Parse_JSON')?['Year']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "connectionName": "shared_commondataserviceforapps",
+                  "operationId": "CreateRecord"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "runtimeConfiguration": {
+                "staticResult": {
+                  "staticResultOptions": "Disabled",
+                  "name": "Add_a_new_row0"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_variable_1": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
